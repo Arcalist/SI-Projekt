@@ -1,22 +1,24 @@
 class Client
     attr_accessor :wait, :order
     @@id = 1
-    @@status = ['pick', 'order', 'eat', 'wait', 'pay']
-    def initialize location
+    def initialize
         @id = @@id
         @@id += 1
-        @location = location
-        @status = ''
-        @wait = 0
+        @status = 'order'
+        self.generate_wait_time
     end
 
     def pass_time
         if @wait > 0 then @wait -= 1
         end
     end
-        
-    def move location
-        @location = location
+    
+    def generate_wait_time
+        rng = Random.new
+        if @status == "eat" then @wait = rng.rand(3..10)                
+        end
+        if @status == "order" then @wait = rng.rand(1..6)
+        end
     end
 
     def get_menu menu

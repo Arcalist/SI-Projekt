@@ -1,12 +1,13 @@
 require './klient.rb'
 
 class Table
-    @@id = 1    
+    @@id = 0    
     def initialize
         @id = @@id
         @@id += 1
         @clients = []
         @ready = false
+        @clean = true
     end
 
     def new_clients
@@ -15,6 +16,7 @@ class Table
         (1..r).each do |x|
             @clients << Client.new(self)
         end
+        @clean = false
     end
 
     def check
@@ -25,6 +27,10 @@ class Table
             end
         end
         if rdy == @clients.count then @ready = true end
+    end
+
+    def clean
+        @clean = true
     end
 
     def to_s
