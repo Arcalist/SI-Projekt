@@ -11,7 +11,7 @@ class Restaurant
         @graph = RGL::DirectedAdjacencyGraph.new
         @tables = [Table.new, Table.new, Table.new, Table.new, Table.new, Table.new, Table.new]
         @kitchen = Kitchen.new
-        @graph.add_vertices 1,2,3,4, @kitchen, @tables
+        #@graph.add_vertices 1,2,3,4, @kitchen
         @edge_weights = 
         {
             [1, 2] => 1,
@@ -19,6 +19,7 @@ class Restaurant
             [1, @tables[0]] => 2,
             [1, @tables[6]] => 2,
             [1, @kitchen] => 1,
+            [@kitchen, 1] => 1,
 
             [2, 1] => 1,
             [2, 3] => 1,
@@ -71,5 +72,5 @@ class Restaurant
 end
 
 restaurant = Restaurant.new
-print restaurant.pathfind(restaurant.tables[1], restaurant.tables[5])
-
+#print restaurant.pathfind(restaurant.tables[1], restaurant.tables[5])
+restaurant.graph.write_to_graphic_file(fmt = 'png', dotfile = "graph")
