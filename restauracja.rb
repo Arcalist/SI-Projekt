@@ -52,6 +52,5 @@ class Restaurant
 end
 
 restaurant = Restaurant.new
-puts restaurant.routes[1][restaurant.tables[6]]
-print restaurant.graph
+puts restaurant.routes[restaurant.kitchen][restaurant.tables[3]]
 

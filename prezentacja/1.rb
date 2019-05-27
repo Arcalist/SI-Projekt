@@ -1,11 +1,15 @@
-require 'rgl/adjacency'
+# https://www.rubydoc.info/github/monora/rgl/RGL/Graph
 
+require 'rgl/adjacency'
+require 'rgl/base'
 graph = RGL::DirectedAdjacencyGraph.new
 graph.add_edge 1,2
 graph.add_vertices 1, 2, 3, 4, 5, "1", 1.to_s.to_sym
 edge_weights = 
 {
     [1, 2] => 1,
+    [1, 6] => 1,
+    [6, 5] => 1,
     [2, 3] => 1,
     [2, 4] => 2,
     [4, 5] => 5,
@@ -14,7 +18,8 @@ edge_weights =
     [3, :"1"] => 3
 }
 edge_weights.each { |(p1, p2), w| graph.add_edge(p1, p2) }
-puts graph.edges
+print graph.edges
+print graph.vertices
 k6 = RGL::AdjacencyGraph.new
 k6.add_vertices 1, 2, 3, 4, 5, 6
 (1..6).each do |x|
@@ -24,11 +29,11 @@ k6.add_vertices 1, 2, 3, 4, 5, 6
 end
 
 require 'rgl/traversal'
-#print graph.bfs_search_tree_from(1)
-
-print graph.vertices
+print graph.bfs_search_tree_from(1)
+#puts graph.bfs_search_tree_from(1)
 require 'rgl/dot'
-k6.write_to_graphic_file('jpg')
+graph.write_to_graphic_file('jpg')
+#puts graph.adjacent_vertices(1)
 
 
 require 'rgl/bellman_ford'
