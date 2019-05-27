@@ -1,4 +1,4 @@
-digraph RGL__DirectedAdjacencyGraph {
+graph RGL__AdjacencyGraph {
     1 [
         fontsize = 8,
         label = 1
@@ -59,147 +59,75 @@ digraph RGL__DirectedAdjacencyGraph {
         label = T1
     ]
 
-    1 -> 2 [
+    1 -- 2 [
         fontsize = 8
     ]
 
-    1 -> 4 [
+    1 -- 4 [
         fontsize = 8
     ]
 
-    1 -> T0 [
+    1 -- T0 [
         fontsize = 8
     ]
 
-    1 -> T6 [
+    1 -- T6 [
         fontsize = 8
     ]
 
-    1 -> Kitchen [
+    1 -- Kitchen [
         fontsize = 8
     ]
 
-    2 -> 1 [
+    2 -- 3 [
         fontsize = 8
     ]
 
-    2 -> 3 [
+    2 -- T0 [
         fontsize = 8
     ]
 
-    2 -> T0 [
+    2 -- T6 [
         fontsize = 8
     ]
 
-    2 -> T6 [
+    2 -- T5 [
         fontsize = 8
     ]
 
-    2 -> T5 [
+    2 -- T4 [
         fontsize = 8
     ]
 
-    2 -> T4 [
+    4 -- 3 [
         fontsize = 8
     ]
 
-    4 -> 1 [
+    4 -- T0 [
         fontsize = 8
     ]
 
-    4 -> 3 [
+    4 -- T1 [
         fontsize = 8
     ]
 
-    4 -> T0 [
+    4 -- T2 [
         fontsize = 8
     ]
 
-    4 -> T1 [
+    T0 -- 3 [
         fontsize = 8
     ]
 
-    4 -> T2 [
+    3 -- T2 [
         fontsize = 8
     ]
 
-    T0 -> 1 [
+    3 -- T3 [
         fontsize = 8
     ]
 
-    T0 -> 2 [
-        fontsize = 8
-    ]
-
-    T0 -> 3 [
-        fontsize = 8
-    ]
-
-    T0 -> 4 [
-        fontsize = 8
-    ]
-
-    T6 -> 1 [
-        fontsize = 8
-    ]
-
-    T6 -> 2 [
-        fontsize = 8
-    ]
-
-    Kitchen -> 1 [
-        fontsize = 8
-    ]
-
-    3 -> 2 [
-        fontsize = 8
-    ]
-
-    3 -> 4 [
-        fontsize = 8
-    ]
-
-    3 -> T0 [
-        fontsize = 8
-    ]
-
-    3 -> T2 [
-        fontsize = 8
-    ]
-
-    3 -> T3 [
-        fontsize = 8
-    ]
-
-    3 -> T4 [
-        fontsize = 8
-    ]
-
-    T5 -> 2 [
-        fontsize = 8
-    ]
-
-    T4 -> 3 [
-        fontsize = 8
-    ]
-
-    T4 -> 2 [
-        fontsize = 8
-    ]
-
-    T2 -> 4 [
-        fontsize = 8
-    ]
-
-    T2 -> 3 [
-        fontsize = 8
-    ]
-
-    T3 -> 3 [
-        fontsize = 8
-    ]
-
-    T1 -> 4 [
+    3 -- T4 [
         fontsize = 8
     ]
 }
