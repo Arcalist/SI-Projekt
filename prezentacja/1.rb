@@ -19,18 +19,21 @@ edge_weights =
 }
 edge_weights.each { |(p1, p2), w| graph.add_edge(p1, p2) }
 print graph.edges
+puts ''
 print graph.vertices
+puts ''
 k6 = RGL::AdjacencyGraph.new
-k6.add_vertices 1, 2, 3, 4, 5, 6
+#k6.add_vertices 1, 2, 3, 4, 5, 6
 (1..6).each do |x|
     (1..6).each do |y|
         unless x == y then k6.add_edge x, y end
     end
 end
-
+puts k6.edges
 require 'rgl/traversal'
-print graph.bfs_search_tree_from(1)
-#puts graph.bfs_search_tree_from(1)
+#print graph.bfs_search_tree_from(1)
+puts graph.bfs_search_tree_from(1)
+graph.depth_first_visit(1) { |d| puts d }
 require 'rgl/dot'
 graph.write_to_graphic_file('jpg')
 #puts graph.adjacent_vertices(1)
