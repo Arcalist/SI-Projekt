@@ -17,5 +17,7 @@ class Menu
         ]
     end
 
-
+    def to_s
+        "menu"
+    end
 end
