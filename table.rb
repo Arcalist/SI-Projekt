@@ -1,9 +1,8 @@
 require './klient.rb'
-require './zamowienie.rb'
 class Table
     @@id = 0 
     attr_reader :clients
-    attr_accessor :stage, :ready, :clean
+    attr_accessor :stage, :ready, :clean, :price
     def initialize
         @id = @@id
         @@id += 1
@@ -11,30 +10,59 @@ class Table
         @ready = false
         @clean = true
         @stage = ''
+        @wait = -1
+        @price = 0
+    end
+
+    def default_state
+        @clients = []
+        @ready = false
+        @clean = true
+        @stage = ''
+        @price = 0
+        @wait = -1
     end
 
     def new_clients
+        @clean = false
         rng = Random.new
         r = rng.rand(1..4)
         (1..r).each do |x|
             @clients << Client.new
         end
-        @clean = false
         @stage = 'menu'
+    end
+
+    def prepare_to_leave
+        @wait = Random.new.rand(2..6)
+        @stage = 'leaving'
     end
 
     def check
         rdy = 0
+        receipt = 0
         @clients.each do |x|
             if x.order != nil && x.wait == 0
                 rdy += 1
             end
+            if x.status == "receipt"
+                receipt += 1
+            end
         end
         if rdy == @clients.count then @ready = true end
-    end
-
-    def clean
-        @clean = true
+        if receipt == @clients.count
+            @stage = "receipt"
+            @ready = true 
+        end
+        if @wait == 0 and @stage == "pay" 
+            @stage = "ready to pay" 
+            @ready = true 
+        end
+        if @wait == 0 and @stage == "leaving"
+            @stage = "left"
+            @ready = true
+            @clients = []
+        end
     end
 
     def pass_time
@@ -44,12 +72,15 @@ class Table
             end
             check
         end
+        if @wait > 0
+            @wait -= 1
+        end
     end
 
     def pass_order
-        o = Order.new
+        o = []
         @clients.each do |x|
-            o.add x.order
+            o << x.order
             x.status = 'wait for food'
         end
         @ready = false
@@ -57,8 +88,19 @@ class Table
         o
     end
 
+    def paying
+        @wait = Random.new.rand(3..8)
+        @clients.each do |c|
+            c.status = "paying"
+            c.wait = @wait
+        end
+        @stage = "pay"
+        @ready = false
+    end
+
     def to_status
-        string = 'Stół '+@id.to_s+ ": \n"
+        string = 'Stół '+@id.to_s+ ": \n "
+        if @clients.empty? and !@clean then return string + "brudny" end
         if @clients.empty? then return string + "wolny" end
         @clients.each do |x|
             string += x.to_s + "\n"
@@ -74,6 +116,10 @@ class Table
         @clients.length
     end
 
+    def to_int
+        @id
+    end
+
     def empty?
         return @clients.empty?
     end
@@ -82,9 +128,10 @@ class Table
         self.class === x and x.id == @id
     end
 
+    def clean?
+        clean
+    end
+
     alias eql? ==
 
-    def hash
-        @id.hash
-    end
 end

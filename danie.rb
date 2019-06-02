@@ -1,5 +1,5 @@
 class Dish
-    attr_accessor :preparation_time, :name, :default_prep
+    attr_accessor :preparation_time, :name, :default_prep, :price
     def initialize name, price, preparation_time
         @name = name
         @price = price

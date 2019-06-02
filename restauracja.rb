@@ -6,7 +6,7 @@ require './table.rb'
 require './kelner.rb'
 
 class Restaurant
-    attr_reader :tables, :kitchen, :routes, :graph, :orders
+    attr_accessor :tables, :kitchen, :routes, :graph, :orders, :queue, :dont_check, :receipts
     def initialize
         @turn = 1
         @graph = RGL::AdjacencyGraph.new
@@ -15,6 +15,8 @@ class Restaurant
         @waiter = Waiter.new(@kitchen, self)
         @orders = Hash.new
         @queue = Hash.new { |h, k| h[k] = [] }
+        @dont_check = false
+        @receipts = Hash.new(0)
         @edge_weights = 
         {
             [1, 2] => 1,
@@ -62,7 +64,7 @@ class Restaurant
         @kitchen.prepare
         @tables.each do |x|
             x.pass_time
-            if x.empty? and x.clean
+            if x.empty? and x.clean?
                 rng = Random.new
                 if rng.rand(1..100) == 5
                     x.new_clients
@@ -77,7 +79,6 @@ class Restaurant
         puts ''
         puts "Kelner: "
         puts @waiter
-        puts @queue["order"]
         @turn += 1
     end
 
@@ -91,6 +92,20 @@ class Restaurant
                 if x.ready
                     unless @queue[x.stage].include? x
                         @queue[x.stage] << x
+                    end
+                end
+            end
+            if !x.clean? and x.empty?
+                @queue["clean"] << x
+            end
+        end
+
+        @orders.keys.each do |x|
+            if !dont_check
+                if kitchen.order_ready? @orders[x]
+                    unless @queue['food'].include? @tables[x]
+                        @queue['food'] << @tables[x]
+                        @dont_check = true
                     end
                 end
             end
@@ -108,14 +123,23 @@ class Restaurant
             return @waiter.prepare_to_menu @queue["menu"].shift
         end
         if @waiter.action.empty? 
-            if !@queue["order"].empty?
+            if !@queue["food"].empty? and @waiter.location == @kitchen
+                return @waiter.prepare_to_deliver_food @queue["food"].shift
+            elsif !@queue["order"].empty?
                 return @waiter.prepare_to_take_order @queue["order"].shift
+            elsif !@queue["food"].empty?
+                return @waiter.prepare_to_deliver_food @queue["food"].shift
+            elsif !@queue["receipt"].empty?
+                return @waiter.prepare_to_receipt @queue["receipt"].shift
+            elsif !@queue["ready to pay"].empty?
+                return @waiter.prepare_to_take_payment @queue["ready to pay"].shift
+            elsif !@queue["clean"].empty?
+                return @waiter.prepare_to_clean @queue["clean"].shift
+            else
+                return @waiter.return_to_kitchen
             end
         end
-        unless @waiter.action.empty?
-            return nil
-        end
-        @waiter.return_to_kitchen
+        
     end
 
 end
