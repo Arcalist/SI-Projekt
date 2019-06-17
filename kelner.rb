@@ -17,6 +17,14 @@ class Waiter
         k.pass_order order
     end
 
+    def at_kitchen?
+        @location.to_s == "Kuchnia"
+    end
+
+    def empty?
+        @action.empty?
+    end
+
     def move
         unless @route.empty? or @route == nil
             @location = @route.shift
@@ -67,6 +75,7 @@ class Waiter
         @action = ["cleaning"]
         @target = target
         @route = @restaurant.pathfind @location, target
+        target.stage = 'cleaning'
     end
 
     def exe_action
@@ -171,6 +180,6 @@ class Waiter
     end
 
     def to_s
-        @location.to_s + " " + @action.to_s + " " + @target.to_s + " " + @holding.join(', ')
+        "Obecna lokacja: " + @location.to_s + "\nObecna trasa: " + @route.join(', ') +"\nObecna akcja: " + @action.to_s + "\nCzego dotyczy obecna akcja " + @target.to_s + "\nTrzyma: " + @holding.join(', ')
     end
 end

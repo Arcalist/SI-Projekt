@@ -4,6 +4,7 @@ require 'rgl/dijkstra'
 require './kitchen.rb'
 require './table.rb'
 require './kelner.rb'
+require 'decisiontree'
 
 class Restaurant
     attr_accessor :tables, :kitchen, :routes, :graph, :orders, :queue, :dont_check, :receipts
@@ -47,6 +48,51 @@ class Restaurant
 
         }
         @edge_weights.each { |(p1, p2), w| @graph.add_edge(p1, p2) }
+        attributes = ['@kitchen', 'queue[menu]', 'queue[food]', 'queue[order]', 'queue[receipt]', 'queue[ready_to_pay]', 'queue[clean]']
+        training = [
+            #@kitch, menu, food, order, receipt, rtp, clean, result
+            ["true", "false", "false", "false", "false", "false", "false", 'menu'],
+            ["false", "false", "false", "false", "false", "false", "false", 'menu'],
+            ["false", "false", "true", "false", "false", "false", "false", 'menu'],
+            ["true", "false", "true", "true", "true", "true", "true", 'menu'],
+            ["false", 'false', 'true', 'false', 'true', 'true', 'true', 'menu'],
+            #["false", "false", "false", "true", "true", "false", "false", 'menu'],
+            
+            ["false", "true", "false", "false", "false", "false", "false", 'order'],
+            ["true", "true", "true", "false", "false", "false", "false", "order"],
+            ["false", "true", "true", "false", "true", "true", "true", "order"],
+            ["true", "true", "true", "false", "true", "true", "true", "order"],
+            ["false", "true", "true", "false", "false", "true", "true", "order"],
+            #["false", "true", "true", "false", "false", "true", "true", "order"],
+            #["false", "true", "true", "false", "false", "false", "false", "order"],
+          
+            ["false", "true", "false", "false", "false", "false", "false", "food"],
+            ["true", "true", "false", "false", "false", "false", "false", "food"],
+            #["true", "false", "false", "true", "true", "true", "true", "food"],
+            ["true", "true", "false", "true", "true", "true", "true", "food"],
+            ["false", "true", "false", "true", "true", "true", "true", "food"],
+            #["true", "false", "false", "false", "true", "false", "true", "food"],
+            #["true", "false", "false", "true", "false", "false", "true", "food"],
+              
+            ["false", "true", "true", "true", "false", "false", "false", 'receipt'],
+            ["true", "true", "true", "true", "false", "false", "false", "receipt"],
+            ["false", "true", "true", "true", "false", "true", "true", "receipt"],
+            ["true", "true", "true", "true", "false", "true", "true", "receipt"],
+          
+            ["false", "true", "true", "true", "true", "false", "false", 'rtp'],
+            ["true", "true", "true", "true", "true", "false", "false", "rtp"],
+            ["false", "true", "true", "true", "true", "false", "true", "rtp"],
+            ["true", "true", "true", "true", "true", "false", "true", "rtp"],
+          
+            ["false", "true", "true", "true", "true", "true", "false", 'clean'],
+            ["true", "true", "true", "true", "true", "true", "false", "clean"],
+          
+            ["false", "true", "true", "true", "true", "true", "true", 'return'],
+            ["true", "true", "true", "true", "true", "true", "true", "return"]
+          
+          ]
+        @dec_tree = DecisionTree::ID3Tree.new(attributes, training, 1, :discrete)
+        @dec_tree.train
 
 
     end
@@ -84,9 +130,10 @@ class Restaurant
 
     def assert_situation
         @tables.each do |x|
-            if x.stage == "menu"
-                unless @queue["menu"].include? x
-                    @queue["menu"] << x
+            puts x.to_s + ' ' + x.stage
+            if x.stage == 'menu'
+                unless @queue['menu'].include? x
+                    @queue['menu'] << x
                 end
             else
                 if x.ready
@@ -95,8 +142,10 @@ class Restaurant
                     end
                 end
             end
-            if !x.clean? and x.empty?
-                @queue["clean"] << x
+            if x.stage == "left"
+                unless @queue['clean'].include? x
+                    @queue['clean'] << x
+                end
             end
         end
 
@@ -116,30 +165,30 @@ class Restaurant
         if @waiter.route.empty? and !@waiter.action.empty?
             return @waiter.exe_action
         end
-        if @waiter.action.include? "give menu"
+        if !@waiter.action.empty?
             return nil
         end
-        if @waiter.action.empty? and !@queue["menu"].empty?
+        @action = "NOT WORKING"
+        @situation = [@waiter.at_kitchen?.to_s, @queue['menu'].empty?.to_s, @queue['food'].empty?.to_s, @queue['order'].empty?.to_s, @queue['receipt'].empty?.to_s, @queue['ready to pay'].empty?.to_s, @queue['clean'].empty?.to_s]
+        @action = @dec_tree.predict(@situation)
+        case @action
+        when 'food'
+            return @waiter.prepare_to_deliver_food @queue["food"].shift
+        when 'menu'
             return @waiter.prepare_to_menu @queue["menu"].shift
+        when 'order'
+            return @waiter.prepare_to_take_order @queue["order"].shift
+        when 'receipt'
+            return @waiter.prepare_to_receipt @queue["receipt"].shift
+        when 'rtp'
+            return @waiter.prepare_to_take_payment @queue["ready to pay"].shift
+        when 'clean'
+            return @waiter.prepare_to_clean @queue["clean"].shift
+        when 'return'
+            return @waiter.return_to_kitchen
+        else
+            return nil
         end
-        if @waiter.action.empty? 
-            if !@queue["food"].empty? and @waiter.location == @kitchen
-                return @waiter.prepare_to_deliver_food @queue["food"].shift
-            elsif !@queue["order"].empty?
-                return @waiter.prepare_to_take_order @queue["order"].shift
-            elsif !@queue["food"].empty?
-                return @waiter.prepare_to_deliver_food @queue["food"].shift
-            elsif !@queue["receipt"].empty?
-                return @waiter.prepare_to_receipt @queue["receipt"].shift
-            elsif !@queue["ready to pay"].empty?
-                return @waiter.prepare_to_take_payment @queue["ready to pay"].shift
-            elsif !@queue["clean"].empty?
-                return @waiter.prepare_to_clean @queue["clean"].shift
-            else
-                return @waiter.return_to_kitchen
-            end
-        end
-        
     end
 
 end
